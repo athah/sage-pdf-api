@@ -757,9 +757,19 @@ def health():
 @app.route("/generate", methods=["POST"])
 def generate():
     try:
-        data = request.get_json(force=True)
+        # Accept both form-encoded (from Make) and JSON
+        content_type = request.content_type or ""
+        if "application/json" in content_type:
+            data = request.get_json(force=True) or {}
+        else:
+            # form-urlencoded or multipart
+            data = request.form.to_dict()
+            if not data:
+                data = request.get_json(force=True) or {}
+
         if not data:
-            return jsonify({"error": "No JSON body"}), 400
+            return jsonify({"error": "No data received"}), 400
+
         pdf_buf = generate_pdf(data)
         fname = (f"{data.get('brand_name','report').replace(' ','_')}_"
                  f"{data.get('month','').replace(' ','_')}_Report.pdf")
