@@ -116,6 +116,38 @@ def parse_posts(raw):
     return sorted(posts, key=lambda x: x['eng_int'], reverse=True)
 
 
+def parse_posts_json(raw):
+    """Parse posts_data JSON array sent from Make.com Array Aggregator."""
+    import json
+    posts = []
+    if not raw:
+        return posts
+    try:
+        items = json.loads(str(raw))
+        if not isinstance(items, list):
+            return posts
+        for item in items:
+            post = {
+                'date':     str(item.get('date', '—')),
+                'type':     str(item.get('media_type', 'IMAGE')),
+                'likes':    str(item.get('likes', '0')),
+                'comments': str(item.get('comments', '0')),
+                'url':      str(item.get('permalink', '')),
+                'caption':  str(item.get('caption', '')),
+                'post_id':  str(item.get('post_id', '')),
+            }
+            try:
+                post['likes_int']    = int(float(str(item.get('likes', 0))))
+                post['comments_int'] = int(float(str(item.get('comments', 0))))
+                post['eng_int']      = post['likes_int'] + post['comments_int']
+            except:
+                post['likes_int'] = post['comments_int'] = post['eng_int'] = 0
+            posts.append(post)
+        return sorted(posts, key=lambda x: x['eng_int'], reverse=True)
+    except:
+        return posts
+
+
 # ── Style dictionary ────────────────────────────────────────────────
 def make_styles():
     return {
@@ -440,7 +472,7 @@ def build_kpi_dashboard(data, st):
 
 def build_content_performance(data, st):
     story = sec_header("03  |  Content Performance", st)
-    posts = parse_posts(data.get("top_posts", data.get("ai_summary","")))
+    posts = parse_posts_json(data.get("posts_data", "")) or parse_posts(data.get("top_posts", ""))
 
     story.append(Paragraph(
         "This section analyses post-level performance for the reporting period. "
@@ -491,18 +523,21 @@ def build_content_performance(data, st):
     story.append(Spacer(1, 4))
 
     ph = [[Paragraph("#",st["th"]),Paragraph("DATE",st["th"]),Paragraph("FORMAT",st["th"]),
-           Paragraph("LIKES",st["th"]),Paragraph("COMMENTS",st["th"]),Paragraph("ENGAGEMENT",st["th"])]]
+           Paragraph("CAPTION",st["th"]),Paragraph("LIKES",st["th"]),Paragraph("COMMENTS",st["th"]),Paragraph("SCORE",st["th"])]]
     pr = []
     for i, p in enumerate(posts[:10]):
+        caption_raw = p.get("caption", "") or ""
+        caption_short = (caption_raw[:55] + "…") if len(caption_raw) > 55 else caption_raw
         pr.append([
             Paragraph(f"<b>{i+1}</b>", st["td"]),
             Paragraph((p.get("date","—")[:10] if p.get("date") else "—"), st["td"]),
             Paragraph(p.get("type","—").replace("_"," "), st["td"]),
+            Paragraph(caption_short or "—", st["td_left"]),
             Paragraph(str(p.get("likes","—")), st["td"]),
             Paragraph(str(p.get("comments","—")), st["td"]),
             Paragraph(f"<b>{p.get('eng_int','—')}</b>", st["td"]),
         ])
-    pcws = [COL_W*0.06,COL_W*0.17,COL_W*0.21,COL_W*0.16,COL_W*0.16,COL_W*0.24]
+    pcws = [COL_W*0.05,COL_W*0.12,COL_W*0.13,COL_W*0.38,COL_W*0.10,COL_W*0.10,COL_W*0.12]
     ts = [
         ("BACKGROUND",    (0,0),(-1,0), SAGE_DARK),
         ("ROWBACKGROUNDS",(0,1),(-1,-1),[WHITE,CREAM_DARK]),
@@ -538,6 +573,8 @@ def build_content_performance(data, st):
     story.append(Paragraph("Top Performer Spotlight", st["h2"]))
     story.append(Spacer(1,4))
     top = posts[0]
+    top_caption = top.get("caption","") or ""
+    top_caption_short = (top_caption[:120] + "…") if len(top_caption) > 120 else top_caption
     spot = [[
         Paragraph("<b>#1 Top Post</b>", ParagraphStyle("spt",fontSize=13,textColor=CREAM,
                                                         fontName="Helvetica-Bold",leading=17)),
@@ -546,6 +583,10 @@ def build_content_performance(data, st):
          Spacer(1,4),
          Paragraph(f"👍 Likes: <b>{top.get('likes','—')}</b>  &nbsp;  💬 Comments: <b>{top.get('comments','—')}</b>  &nbsp;  ⚡ Score: <b>{top.get('eng_int','—')}</b>",
                    ParagraphStyle("sb2",fontSize=10,textColor=CREAM,fontName="Helvetica",leading=14)),
+         Spacer(1,4),
+         Paragraph(f"<i>{top_caption_short}</i>",
+                   ParagraphStyle("scap",fontSize=8.5,textColor=SAGE_PALE,fontName="Helvetica",leading=12))
+         if top_caption_short else Spacer(1,1),
          Spacer(1,4),
          Paragraph(f"<a href='{top.get('url','#')}'><font color='#C8D9C7'>View Post →</font></a>",
                    ParagraphStyle("sl",fontSize=8.5,textColor=SAGE_PALE,fontName="Helvetica",leading=12))
