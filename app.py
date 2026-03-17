@@ -533,7 +533,7 @@ def build_content_performance(data, st):
         link_cell = Paragraph(f"<a href='{url}'><font color='#2E5D4B'>View →</font></a>", st["td"]) if url else Paragraph("—", st["td"])
         pr.append([
             Paragraph(f"<b>{i+1}</b>", st["td"]),
-            Paragraph((p.get("date","—")[:10] if p.get("date") else "—"), st["td"]),
+            Paragraph(p.get("date","—") or "—", st["td"]),
             Paragraph(p.get("type","—").replace("_"," "), st["td"]),
             Paragraph(str(p.get("likes","—")), st["td"]),
             Paragraph(str(p.get("comments","—")), st["td"]),
@@ -579,7 +579,7 @@ def build_content_performance(data, st):
     spot = [[
         Paragraph("<b>#1 Top Post</b>", ParagraphStyle("spt",fontSize=13,textColor=CREAM,
                                                         fontName="Helvetica-Bold",leading=17)),
-        [Paragraph(f"Date: <b>{top.get('date','—')[:10]}</b>  |  Format: <b>{top.get('type','—').replace('_',' ')}</b>",
+        [Paragraph(f"Date: <b>{top.get('date','—')}</b>  |  Format: <b>{top.get('type','—').replace('_',' ')}</b>",
                    ParagraphStyle("sb",fontSize=9.5,textColor=CREAM,fontName="Helvetica",leading=14)),
          Spacer(1,4),
          Paragraph(f"👍 Likes: <b>{top.get('likes','—')}</b>  &nbsp;  💬 Comments: <b>{top.get('comments','—')}</b>  &nbsp;  ⚡ Score: <b>{top.get('eng_int','—')}</b>",
