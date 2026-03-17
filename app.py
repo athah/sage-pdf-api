@@ -525,9 +525,11 @@ def build_content_performance(data, st):
     story.append(Spacer(1, 4))
 
     ph = [[Paragraph("#",st["th"]),Paragraph("DATE",st["th"]),Paragraph("FORMAT",st["th"]),
-           Paragraph("LIKES",st["th"]),Paragraph("COMMENTS",st["th"]),Paragraph("SCORE",st["th"])]]
+           Paragraph("LIKES",st["th"]),Paragraph("COMMENTS",st["th"]),Paragraph("SCORE",st["th"]),Paragraph("LINK",st["th"])]]
     pr = []
     for i, p in enumerate(posts[:10]):
+        url = p.get("url","")
+        link_cell = Paragraph(f"<a href='{url}'><font color='#2E5D4B'>View →</font></a>", st["td"]) if url else Paragraph("—", st["td"])
         pr.append([
             Paragraph(f"<b>{i+1}</b>", st["td"]),
             Paragraph((p.get("date","—")[:10] if p.get("date") else "—"), st["td"]),
@@ -535,8 +537,9 @@ def build_content_performance(data, st):
             Paragraph(str(p.get("likes","—")), st["td"]),
             Paragraph(str(p.get("comments","—")), st["td"]),
             Paragraph(f"<b>{p.get('eng_int','—')}</b>", st["td"]),
+            link_cell,
         ])
-    pcws = [COL_W*0.07,COL_W*0.18,COL_W*0.20,COL_W*0.18,COL_W*0.18,COL_W*0.19]
+    pcws = [COL_W*0.06,COL_W*0.14,COL_W*0.16,COL_W*0.14,COL_W*0.15,COL_W*0.14,COL_W*0.21]
     ts = [
         ("BACKGROUND",    (0,0),(-1,0), SAGE_DARK),
         ("ROWBACKGROUNDS",(0,1),(-1,-1),[WHITE,CREAM_DARK]),
