@@ -525,21 +525,18 @@ def build_content_performance(data, st):
     story.append(Spacer(1, 4))
 
     ph = [[Paragraph("#",st["th"]),Paragraph("DATE",st["th"]),Paragraph("FORMAT",st["th"]),
-           Paragraph("CAPTION",st["th"]),Paragraph("LIKES",st["th"]),Paragraph("COMMENTS",st["th"]),Paragraph("SCORE",st["th"])]]
+           Paragraph("LIKES",st["th"]),Paragraph("COMMENTS",st["th"]),Paragraph("SCORE",st["th"])]]
     pr = []
     for i, p in enumerate(posts[:10]):
-        caption_raw = p.get("caption", "") or ""
-        caption_short = (caption_raw[:55] + "…") if len(caption_raw) > 55 else caption_raw
         pr.append([
             Paragraph(f"<b>{i+1}</b>", st["td"]),
             Paragraph((p.get("date","—")[:10] if p.get("date") else "—"), st["td"]),
             Paragraph(p.get("type","—").replace("_"," "), st["td"]),
-            Paragraph(caption_short or "—", st["td_left"]),
             Paragraph(str(p.get("likes","—")), st["td"]),
             Paragraph(str(p.get("comments","—")), st["td"]),
             Paragraph(f"<b>{p.get('eng_int','—')}</b>", st["td"]),
         ])
-    pcws = [COL_W*0.05,COL_W*0.12,COL_W*0.13,COL_W*0.38,COL_W*0.10,COL_W*0.10,COL_W*0.12]
+    pcws = [COL_W*0.07,COL_W*0.18,COL_W*0.20,COL_W*0.18,COL_W*0.18,COL_W*0.19]
     ts = [
         ("BACKGROUND",    (0,0),(-1,0), SAGE_DARK),
         ("ROWBACKGROUNDS",(0,1),(-1,-1),[WHITE,CREAM_DARK]),
@@ -575,8 +572,6 @@ def build_content_performance(data, st):
     story.append(Paragraph("Top Performer Spotlight", st["h2"]))
     story.append(Spacer(1,4))
     top = posts[0]
-    top_caption = top.get("caption","") or ""
-    top_caption_short = (top_caption[:120] + "…") if len(top_caption) > 120 else top_caption
     spot = [[
         Paragraph("<b>#1 Top Post</b>", ParagraphStyle("spt",fontSize=13,textColor=CREAM,
                                                         fontName="Helvetica-Bold",leading=17)),
@@ -585,10 +580,6 @@ def build_content_performance(data, st):
          Spacer(1,4),
          Paragraph(f"👍 Likes: <b>{top.get('likes','—')}</b>  &nbsp;  💬 Comments: <b>{top.get('comments','—')}</b>  &nbsp;  ⚡ Score: <b>{top.get('eng_int','—')}</b>",
                    ParagraphStyle("sb2",fontSize=10,textColor=CREAM,fontName="Helvetica",leading=14)),
-         Spacer(1,4),
-         Paragraph(f"<i>{top_caption_short}</i>",
-                   ParagraphStyle("scap",fontSize=8.5,textColor=SAGE_PALE,fontName="Helvetica",leading=12))
-         if top_caption_short else Spacer(1,1),
          Spacer(1,4),
          Paragraph(f"<a href='{top.get('url','#')}'><font color='#C8D9C7'>View Post →</font></a>",
                    ParagraphStyle("sl",fontSize=8.5,textColor=SAGE_PALE,fontName="Helvetica",leading=12))
