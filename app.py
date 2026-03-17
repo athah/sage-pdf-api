@@ -659,18 +659,6 @@ def build_ai_insights(data, st):
             story.append(Paragraph(clean, st["body"]))
             story.append(Spacer(1,4))
 
-    # Editor note
-    story.append(Spacer(1,8))
-    note = Table([[Paragraph(
-        "<b>📝 Editor Note:</b> This analysis is AI-generated. Please review for accuracy, "
-        "personalise the tone to match the client relationship, and confirm all figures before sending.",
-        ParagraphStyle("note",fontSize=8.5,textColor=colors.HexColor("#7A5C00"),
-                       fontName="Helvetica",leading=13))]],colWidths=[COL_W])
-    note.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,-1),colors.HexColor("#FFFBE6")),
-                               ("LEFTPADDING",(0,0),(-1,-1),14),("RIGHTPADDING",(0,0),(-1,-1),14),
-                               ("TOPPADDING",(0,0),(-1,-1),10),("BOTTOMPADDING",(0,0),(-1,-1),10),
-                               ("BOX",(0,0),(-1,-1),0.8,ACCENT_GOLD)]))
-    story.append(note)
     story.append(PageBreak())
     return story
 
