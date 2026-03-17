@@ -123,8 +123,9 @@ def parse_posts_json(raw):
     if not raw:
         return posts
     try:
-        # Replace literal newlines/tabs inside the JSON string (from Instagram captions)
+        # Replace literal newlines/tabs, then fix missing commas between objects
         raw_clean = re.sub(r'[\r\n\t]+', ' ', str(raw))
+        raw_clean = re.sub(r'}\s*{', '},{', raw_clean)
         items = json.loads(raw_clean)
         if not isinstance(items, list):
             return posts
