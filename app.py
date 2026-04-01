@@ -744,20 +744,59 @@ def build_recommendations(data, st):
 def format_month(raw):
     """Convert any date/timestamp string to 'March 2026' format."""
     if not raw:
-        return "—"
+        return None
     for fmt in ("%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ",
                 "%Y-%m-%d", "%B %Y", "%b %Y"):
         try:
-            return datetime.strptime(raw.strip(), fmt).strftime("%B %Y")
+            return datetime.strptime(raw.strip(), fmt)
         except ValueError:
             continue
-    return raw  # fallback: return as-is if nothing matches
+    return None
+
+
+def prev_month(dt):
+    """Return a datetime one calendar month earlier."""
+    if dt.month == 1:
+        return dt.replace(year=dt.year - 1, month=12, day=1)
+    return dt.replace(month=dt.month - 1, day=1)
 
 
 def generate_pdf(data):
-    # Normalise month to human-readable "March 2026"
     data = dict(data)
-    data["month"] = format_month(data.get("month", ""))
+
+    # Parse the incoming month timestamp and compute the REPORTING month
+    # (one month back — reports run on the 1st cover the previous month)
+    raw_dt = format_month(data.get("month", ""))
+    if raw_dt:
+        reporting_dt = prev_month(raw_dt)
+        reporting_month_str  = reporting_dt.strftime("%B %Y")   # "March 2026"
+        current_month_name   = raw_dt.strftime("%B")             # "April"
+        current_year_str     = raw_dt.strftime("%Y")             # "2026"
+        reporting_month_name = reporting_dt.strftime("%B")       # "March"
+        reporting_year_str   = reporting_dt.strftime("%Y")       # "2026"
+    else:
+        reporting_month_str  = "—"
+        current_month_name   = ""
+        reporting_month_name = ""
+        current_year_str     = ""
+        reporting_year_str   = ""
+
+    data["month"] = reporting_month_str
+
+    # Replace any stray current-month references in the AI summary text
+    if current_month_name and "ai_summary" in data:
+        summary = data["ai_summary"]
+        summary = summary.replace(
+            f"{current_month_name} {current_year_str}",
+            f"{reporting_month_name} {reporting_year_str}"
+        )
+        summary = summary.replace(f"in {current_month_name}",
+                                  f"in {reporting_month_name}")
+        summary = summary.replace(f"During {current_month_name}",
+                                  f"During {reporting_month_name}")
+        summary = summary.replace(f"during {current_month_name}",
+                                  f"during {reporting_month_name}")
+        data["ai_summary"] = summary
 
     buf = io.BytesIO()
     st = make_styles()
