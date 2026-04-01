@@ -10,6 +10,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 from reportlab.platypus import Flowable
 import io, re
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -740,7 +741,24 @@ def build_recommendations(data, st):
 
 
 # ── Main PDF builder ─────────────────────────────────────────────────
+def format_month(raw):
+    """Convert any date/timestamp string to 'March 2026' format."""
+    if not raw:
+        return "—"
+    for fmt in ("%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ",
+                "%Y-%m-%d", "%B %Y", "%b %Y"):
+        try:
+            return datetime.strptime(raw.strip(), fmt).strftime("%B %Y")
+        except ValueError:
+            continue
+    return raw  # fallback: return as-is if nothing matches
+
+
 def generate_pdf(data):
+    # Normalise month to human-readable "March 2026"
+    data = dict(data)
+    data["month"] = format_month(data.get("month", ""))
+
     buf = io.BytesIO()
     st = make_styles()
     page_num[0] = 0
