@@ -605,7 +605,7 @@ def build_content_performance(data, st):
 
 
 def build_ai_insights(data, st):
-    story = sec_header("04  |  AI-Generated Insights", st)
+    story = sec_header("04  |  Performance Insights", st)
     story.append(Spacer(1, 4))
 
     ai_text = data.get("ai_summary","No AI summary available.")
